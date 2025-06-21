@@ -1,0 +1,1256 @@
+{
+	"info": {
+		"_postman_id": "agriconnect-api-collection",
+		"name": "AgriConnect API",
+		"description": "Collection complète pour tester l'API AgriConnect - Marketplace agricole",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "agriconnect-api"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentification",
+			"item": [
+				{
+					"name": "Inscription Acheteur",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Jean Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"motDePasse\": \"MotDePasse123!\",\n  \"role\": \"ACHETEUR\",\n  \"telephone\": \"+33123456789\",\n  \"adresse\": \"123 Rue de la Paix\",\n  \"ville\": \"Paris\",\n  \"codePostal\": \"75001\",\n  \"pays\": \"France\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Inscription d'un nouvel acheteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Inscription Producteur",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Marie Martin\",\n  \"email\": \"marie.martin@example.com\",\n  \"motDePasse\": \"MotDePasse123!\",\n  \"role\": \"PRODUCTEUR\",\n  \"telephone\": \"+33123456790\",\n  \"adresse\": \"456 Ferme des Champs\",\n  \"ville\": \"Lyon\",\n  \"codePostal\": \"69000\",\n  \"pays\": \"France\",\n  \"nomExploitation\": \"Ferme Bio Martin\",\n  \"descriptionExploitation\": \"Exploitation agricole biologique spécialisée dans les légumes\",\n  \"certifieBio\": true,\n  \"adresseExploitation\": \"456 Route des Champs\",\n  \"villeExploitation\": \"Lyon\",\n  \"codePostalExploitation\": \"69000\",\n  \"paysExploitation\": \"France\",\n  \"telephoneExploitation\": \"+33123456791\",\n  \"siteWeb\": \"https://ferme-martin.fr\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Inscription d'un nouveau producteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Connexion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jean.dupont@example.com\",\n  \"motDePasse\": \"MotDePasse123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Connexion d'un utilisateur"
+					},
+					"response": []
+				},
+				{
+					"name": "Rafraîchir Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Rafraîchir le token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Vérifier Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/verify?token={{email_verification_token}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{email_verification_token}}"
+								}
+							]
+						},
+						"description": "Vérifier l'email avec le token reçu"
+					},
+					"response": []
+				},
+				{
+					"name": "Demander Réinitialisation Mot de Passe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jean.dupont@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Demander la réinitialisation du mot de passe"
+					},
+					"response": []
+				},
+				{
+					"name": "Réinitialiser Mot de Passe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{password_reset_token}}\",\n  \"nouveauMotDePasse\": \"NouveauMotDePasse123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Réinitialiser le mot de passe avec le token"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints d'authentification et gestion des utilisateurs"
+		},
+		{
+			"name": "🛍️ Produits",
+			"item": [
+				{
+					"name": "Créer Produit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Tomates Bio Cherry\",\n  \"description\": \"Tomates cerises biologiques, douces et sucrées\",\n  \"prix\": 4.50,\n  \"quantiteDisponible\": 100,\n  \"categorie\": \"LEGUMES\",\n  \"unite\": \"kg\",\n  \"bio\": true,\n  \"origine\": \"Lyon\",\n  \"imagePrincipale\": \"https://example.com/tomates-cherry.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products?producteurId={{producteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								}
+							]
+						},
+						"description": "Créer un nouveau produit (Producteur uniquement)"
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer Tous les Produits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?page=0&size=10&sort=dateCreation,desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "dateCreation,desc"
+								}
+							]
+						},
+						"description": "Récupérer tous les produits avec pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer Produit par ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/{{produit_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{produit_id}}"
+							]
+						},
+						"description": "Récupérer un produit spécifique par son ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher Produits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/search?categorie=LEGUMES&bio=true&prixMin=1.00&prixMax=10.00&nom=tomate&origine=Lyon&page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"search"
+							],
+							"query": [
+								{
+									"key": "categorie",
+									"value": "LEGUMES"
+								},
+								{
+									"key": "bio",
+									"value": "true"
+								},
+								{
+									"key": "prixMin",
+									"value": "1.00"
+								},
+								{
+									"key": "prixMax",
+									"value": "10.00"
+								},
+								{
+									"key": "nom",
+									"value": "tomate"
+								},
+								{
+									"key": "origine",
+									"value": "Lyon"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Rechercher des produits avec filtres"
+					},
+					"response": []
+				},
+				{
+					"name": "Produits Populaires",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/popular?page=0&size=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"popular"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Récupérer les produits les plus populaires"
+					},
+					"response": []
+				},
+				{
+					"name": "Produits Récents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/recent?page=0&size=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"recent"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Récupérer les produits les plus récents"
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier Produit",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Tomates Bio Cherry Premium\",\n  \"description\": \"Tomates cerises biologiques premium, encore plus douces\",\n  \"prix\": 5.50,\n  \"quantiteDisponible\": 80,\n  \"categorie\": \"LEGUMES\",\n  \"unite\": \"kg\",\n  \"bio\": true,\n  \"origine\": \"Lyon\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products/{{produit_id}}?producteurId={{producteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{produit_id}}"
+							],
+							"query": [
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								}
+							]
+						},
+						"description": "Modifier un produit existant (Producteur uniquement)"
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer Produit",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/{{produit_id}}?producteurId={{producteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{produit_id}}"
+							],
+							"query": [
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								}
+							]
+						},
+						"description": "Supprimer un produit (Producteur uniquement)"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/products/{{produit_id}}/upload-image?producteurId={{producteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{produit_id}}",
+								"upload-image"
+							],
+							"query": [
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								}
+							]
+						},
+						"description": "Uploader une image pour un produit"
+					},
+					"response": []
+				},
+				{
+					"name": "Vérifier Disponibilité",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/{{produit_id}}/availability?quantiteDemandee=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"{{produit_id}}",
+								"availability"
+							],
+							"query": [
+								{
+									"key": "quantiteDemandee",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Vérifier la disponibilité d'un produit"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestion des produits agricoles"
+		},
+		{
+			"name": "🛒 Panier",
+			"item": [
+				{
+					"name": "Récupérer Panier",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Récupérer le panier de l'acheteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Ajouter Élément au Panier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"produitId\": \"{{produit_id}}\",\n  \"quantite\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/add?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"add"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Ajouter un produit au panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier Quantité",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart/update-quantity?acheteurId={{acheteur_id}}&elementId={{element_panier_id}}&nouvelleQuantite=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"update-quantity"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								},
+								{
+									"key": "elementId",
+									"value": "{{element_panier_id}}"
+								},
+								{
+									"key": "nouvelleQuantite",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Modifier la quantité d'un élément du panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer Élément",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart/remove?acheteurId={{acheteur_id}}&elementId={{element_panier_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"remove"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								},
+								{
+									"key": "elementId",
+									"value": "{{element_panier_id}}"
+								}
+							]
+						},
+						"description": "Supprimer un élément du panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Vider Panier",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart/clear?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"clear"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Vider complètement le panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Appliquer Code Promo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart/apply-promo?acheteurId={{acheteur_id}}&codePromo=BIENVENUE10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"apply-promo"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								},
+								{
+									"key": "codePromo",
+									"value": "BIENVENUE10"
+								}
+							]
+						},
+						"description": "Appliquer un code promo au panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Vérifier Disponibilité Panier",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart/check-availability?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"check-availability"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Vérifier la disponibilité de tous les produits du panier"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestion du panier d'achat"
+		},
+		{
+			"name": "📦 Commandes",
+			"item": [
+				{
+					"name": "Créer Commande",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"adresseLivraison\": \"123 Rue de la Paix\",\n  \"villeLivraison\": \"Paris\",\n  \"codePostalLivraison\": \"75001\",\n  \"paysLivraison\": \"France\",\n  \"telephoneLivraison\": \"+33123456789\",\n  \"instructionsLivraison\": \"Livrer entre 14h et 18h\",\n  \"methodePaiement\": \"CARTE_BANCAIRE\",\n  \"codePromo\": \"BIENVENUE10\",\n  \"elements\": [\n    {\n      \"produitId\": \"{{produit_id}}\",\n      \"quantite\": 3,\n      \"prixUnitaire\": 4.50\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Créer une nouvelle commande à partir du panier"
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer Commande par ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/{{commande_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{commande_id}}"
+							]
+						},
+						"description": "Récupérer une commande spécifique"
+					},
+					"response": []
+				},
+				{
+					"name": "Commandes de l'Acheteur",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/acheteur/{{acheteur_id}}?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"acheteur",
+								"{{acheteur_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Récupérer toutes les commandes d'un acheteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Commandes du Producteur",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/producteur/{{producteur_id}}?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"producteur",
+								"{{producteur_id}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Récupérer toutes les commandes d'un producteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Mettre à Jour Statut Commande",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/{{commande_id}}/status?nouveauStatut=CONFIRMEE&producteurId={{producteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{commande_id}}",
+								"status"
+							],
+							"query": [
+								{
+									"key": "nouveauStatut",
+									"value": "CONFIRMEE"
+								},
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								}
+							]
+						},
+						"description": "Mettre à jour le statut d'une commande (Producteur uniquement)"
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher Commandes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/search?statut=EN_ATTENTE&dateDebut=2024-01-01&dateFin=2024-12-31&acheteurId={{acheteur_id}}&producteurId={{producteur_id}}&page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"search"
+							],
+							"query": [
+								{
+									"key": "statut",
+									"value": "EN_ATTENTE"
+								},
+								{
+									"key": "dateDebut",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "dateFin",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								},
+								{
+									"key": "producteurId",
+									"value": "{{producteur_id}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Rechercher des commandes avec filtres"
+					},
+					"response": []
+				},
+				{
+					"name": "Analytics Producteur",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{producteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/analytics/producteur/{{producteur_id}}?periode=30j",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"analytics",
+								"producteur",
+								"{{producteur_id}}"
+							],
+							"query": [
+								{
+									"key": "periode",
+									"value": "30j"
+								}
+							]
+						},
+						"description": "Récupérer les analytics des commandes pour un producteur"
+					},
+					"response": []
+				},
+				{
+					"name": "Annuler Commande",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{acheteur_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/{{commande_id}}/cancel?acheteurId={{acheteur_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{commande_id}}",
+								"cancel"
+							],
+							"query": [
+								{
+									"key": "acheteurId",
+									"value": "{{acheteur_id}}"
+								}
+							]
+						},
+						"description": "Annuler une commande (Acheteur uniquement)"
+					},
+					"response": []
+				},
+				{
+					"name": "Commandes Récentes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/recent?page=0&size=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"recent"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Récupérer les commandes récentes"
+					},
+					"response": []
+				}
+			],
+			"description": "Gestion des commandes"
+		},
+		{
+			"name": "📊 Monitoring",
+			"item": [
+				{
+					"name": "Santé de l'API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						},
+						"description": "Vérifier la santé de l'API"
+					},
+					"response": []
+				},
+				{
+					"name": "Informations de l'API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/info",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"info"
+							]
+						},
+						"description": "Récupérer les informations de l'API"
+					},
+					"response": []
+				},
+				{
+					"name": "Métriques",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/metrics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"metrics"
+							]
+						},
+						"description": "Récupérer les métriques de l'API"
+					},
+					"response": []
+				},
+				{
+					"name": "Prometheus",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/prometheus",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"actuator",
+								"prometheus"
+							]
+						},
+						"description": "Métriques au format Prometheus"
+					},
+					"response": []
+				}
+			],
+			"description": "Monitoring et métriques de l'API"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "acheteur_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "producteur_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "acheteur_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "producteur_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "produit_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "commande_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "element_panier_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "email_verification_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "password_reset_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+} 
