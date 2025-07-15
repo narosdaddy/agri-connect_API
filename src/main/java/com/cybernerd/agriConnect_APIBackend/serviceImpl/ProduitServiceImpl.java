@@ -2,11 +2,12 @@ package com.cybernerd.agriConnect_APIBackend.serviceImpl;
 
 import com.cybernerd.agriConnect_APIBackend.dtos.produit.ProduitRequest;
 import com.cybernerd.agriConnect_APIBackend.dtos.produit.ProduitResponse;
-import com.cybernerd.agriConnect_APIBackend.enumType.CategorieProduit;
 import com.cybernerd.agriConnect_APIBackend.model.Producteur;
 import com.cybernerd.agriConnect_APIBackend.model.Produit;
 import com.cybernerd.agriConnect_APIBackend.repository.ProducteurRepository;
 import com.cybernerd.agriConnect_APIBackend.repository.ProduitRepository;
+import com.cybernerd.agriConnect_APIBackend.repository.CategorieProduitRepository;
+import com.cybernerd.agriConnect_APIBackend.model.CategorieProduit;
 import com.cybernerd.agriConnect_APIBackend.service.ProduitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class ProduitServiceImpl implements ProduitService {
 
     private final ProduitRepository produitRepository;
     private final ProducteurRepository producteurRepository;
+    private final CategorieProduitRepository categorieProduitRepository;
     private static final String UPLOAD_DIR = "uploads/produits/";
 
     @Override
@@ -41,13 +43,14 @@ public class ProduitServiceImpl implements ProduitService {
         
         Producteur producteur = producteurRepository.findById(producteurId)
                 .orElseThrow(() -> new RuntimeException("Producteur non trouvé"));
-
+        CategorieProduit categorie = categorieProduitRepository.findById(UUID.fromString(request.getCategorieId()))
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée"));
         Produit produit = Produit.builder()
                 .nom(request.getNom())
                 .description(request.getDescription())
                 .prix(request.getPrix())
                 .quantiteDisponible(request.getQuantiteDisponible())
-                .categorie(request.getCategorie())
+                .categorie(categorie)
                 .unite(request.getUnite())
                 .bio(request.isBio())
                 .origine(request.getOrigine())
@@ -78,11 +81,13 @@ public class ProduitServiceImpl implements ProduitService {
             throw new RuntimeException("Accès non autorisé à ce produit");
         }
 
+        CategorieProduit categorie = categorieProduitRepository.findById(UUID.fromString(request.getCategorieId()))
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée"));
         produit.setNom(request.getNom());
         produit.setDescription(request.getDescription());
         produit.setPrix(request.getPrix());
         produit.setQuantiteDisponible(request.getQuantiteDisponible());
-        produit.setCategorie(request.getCategorie());
+        produit.setCategorie(categorie);
         produit.setUnite(request.getUnite());
         produit.setBio(request.isBio());
         produit.setOrigine(request.getOrigine());
@@ -136,20 +141,24 @@ public class ProduitServiceImpl implements ProduitService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProduitResponse> rechercherProduits(
-            CategorieProduit categorie,
+            String categorieId,
             Boolean bio,
             BigDecimal prixMin,
             BigDecimal prixMax,
             String nom,
             String origine,
             Pageable pageable) {
-        
-        log.info("Recherche de produits avec filtres: catégorie={}, bio={}, prixMin={}, prixMax={}, nom={}, origine={}",
-                categorie, bio, prixMin, prixMax, nom, origine);
-        
-        Page<Produit> produits = produitRepository.rechercherProduits(
-                categorie, bio, prixMin, prixMax, nom, origine, pageable);
-        
+        log.info("Recherche de produits avec filtres: catégorieId={}, bio={}, prixMin={}, prixMax={}, nom={}, origine={}",
+                categorieId, bio, prixMin, prixMax, nom, origine);
+        Page<Produit> produits;
+        if (categorieId != null && !categorieId.isEmpty()) {
+            List<Produit> filtered = produitRepository.findAll(pageable).stream()
+                .filter(p -> p.getCategorie() != null && p.getCategorie().getId().toString().equals(categorieId))
+                .collect(Collectors.toList());
+            produits = new org.springframework.data.domain.PageImpl<>(filtered, pageable, filtered.size());
+        } else {
+            produits = produitRepository.findAll(pageable);
+        }
         return produits.map(this::mapToProduitResponse);
     }
 
@@ -200,6 +209,12 @@ public class ProduitServiceImpl implements ProduitService {
 
         if (!produit.getProducteur().getId().equals(producteurId)) {
             throw new RuntimeException("Accès non autorisé à ce produit");
+        }
+
+        // Validation du type MIME
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new RuntimeException("Seuls les fichiers de type image sont acceptés (type reçu : " + contentType + ")");
         }
 
         try {
@@ -292,7 +307,8 @@ public class ProduitServiceImpl implements ProduitService {
                 .description(produit.getDescription())
                 .prix(produit.getPrix())
                 .quantiteDisponible(produit.getQuantiteDisponible())
-                .categorie(produit.getCategorie())
+                .categorieId(produit.getCategorie() != null ? produit.getCategorie().getId().toString() : null)
+                .categorieNom(produit.getCategorie() != null ? produit.getCategorie().getNom() : null)
                 .unite(produit.getUnite())
                 .bio(produit.isBio())
                 .origine(produit.getOrigine())

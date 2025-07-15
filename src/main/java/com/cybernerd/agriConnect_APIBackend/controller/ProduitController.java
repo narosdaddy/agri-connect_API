@@ -27,9 +27,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/products")
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
-@Tag(name = "Produits", description = "API pour la gestion des produits agricoles")
+@RequestMapping("/api/v1/produits")
+@Tag(name = "Produits", description = "API pour la gestion des produits")
 @RequiredArgsConstructor
 public class ProduitController {
 
@@ -124,10 +123,10 @@ public class ProduitController {
             @Parameter(description = "Origine du produit") @RequestParam(required = false) String origine,
             @Parameter(description = "Numéro de page") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "20") int size) {
-        
         Pageable pageable = PageRequest.of(page, size);
+        String categorieId = (categorie != null) ? categorie.name() : null;
         Page<ProduitResponse> response = produitService.rechercherProduits(
-                categorie, bio, prixMin, prixMax, nom, origine, pageable);
+                categorieId, bio, prixMin, prixMax, nom, origine, pageable);
         return ResponseEntity.ok(response);
     }
 

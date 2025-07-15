@@ -52,6 +52,12 @@ public class CommandeRequest {
     @NotNull(message = "Les éléments de la commande sont obligatoires")
     private List<ElementCommandeRequest> elements;
 
+    @Schema(description = "Le client souhaite-t-il être livré ?")
+    private Boolean souhaiteLivraison;
+
+    @Schema(description = "ID du partenaire logistique choisi (optionnel)")
+    private java.util.UUID partenaireLogistiqueId;
+
     @Data
     @Builder
     @NoArgsConstructor

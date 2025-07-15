@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +40,6 @@ public class PanierServiceImpl implements PanierService {
         return mapToPanierResponse(panier);
     }
 
-    @Override
     public PanierResponse ajouterElement(UUID acheteurId, ElementPanierRequest request) {
         log.info("Ajout d'élément au panier pour l'acheteur: {}, produit: {}, quantité: {}", 
                 acheteurId, request.getProduitId(), request.getQuantite());
@@ -141,20 +139,15 @@ public class PanierServiceImpl implements PanierService {
     }
 
     @Override
-    public PanierResponse viderPanier(UUID acheteurId) {
+    public void viderPanier(UUID acheteurId) {
         log.info("Vidage du panier pour l'acheteur: {}", acheteurId);
-        
         Panier panier = getOrCreatePanier(acheteurId);
-        
-        // Supprimer tous les éléments
         elementPanierRepository.deleteAll(panier.getElements());
         panier.getElements().clear();
         panier.setCodePromo(null);
         panier.recalculerTotaux();
         panierRepository.save(panier);
-        
         log.info("Panier vidé avec succès pour l'acheteur: {}", acheteurId);
-        return mapToPanierResponse(panier);
     }
 
     @Override
@@ -272,5 +265,28 @@ public class PanierServiceImpl implements PanierService {
                 .unite(element.getProduit().getUnite())
                 .disponible(element.getProduit().estEnStock())
                 .build();
+    }
+
+    public PanierResponse ajouterAuPanier(ElementPanierRequest request, UUID acheteurId) {
+        // Utilise la logique de ajouterElement
+        return ajouterElement(acheteurId, request);
+    }
+
+    public PanierResponse supprimerDuPanier(UUID acheteurId, UUID produitId) {
+        log.info("Suppression d'un produit du panier: {} pour l'acheteur: {}", produitId, acheteurId);
+        Panier panier = getOrCreatePanier(acheteurId);
+        Optional<ElementPanier> elementOpt = panier.getElements().stream()
+                .filter(e -> e.getProduit().getId().equals(produitId))
+                .findFirst();
+        if (elementOpt.isPresent()) {
+            ElementPanier element = elementOpt.get();
+            panier.supprimerElement(element);
+            elementPanierRepository.delete(element);
+            panierRepository.save(panier);
+            log.info("Produit supprimé du panier avec succès: {}", produitId);
+        } else {
+            log.warn("Produit à supprimer non trouvé dans le panier: {}", produitId);
+        }
+        return mapToPanierResponse(panier);
     }
 } 

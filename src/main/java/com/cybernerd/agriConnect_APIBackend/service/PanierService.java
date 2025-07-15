@@ -9,13 +9,15 @@ public interface PanierService {
 
     PanierResponse getPanier(UUID acheteurId);
 
-    PanierResponse ajouterElement(UUID acheteurId, ElementPanierRequest request);
+    PanierResponse ajouterAuPanier(ElementPanierRequest request, UUID acheteurId);
+
+    PanierResponse supprimerDuPanier(UUID acheteurId, UUID produitId);
+
+    void viderPanier(UUID acheteurId);
 
     PanierResponse modifierQuantite(UUID acheteurId, UUID elementId, Integer nouvelleQuantite);
 
     PanierResponse supprimerElement(UUID acheteurId, UUID elementId);
-
-    PanierResponse viderPanier(UUID acheteurId);
 
     PanierResponse appliquerCodePromo(UUID acheteurId, String codePromo);
 

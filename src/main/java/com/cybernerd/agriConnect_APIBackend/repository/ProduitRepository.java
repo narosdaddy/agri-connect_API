@@ -1,6 +1,7 @@
 package com.cybernerd.agriConnect_APIBackend.repository;
 
 import com.cybernerd.agriConnect_APIBackend.enumType.CategorieProduit;
+import com.cybernerd.agriConnect_APIBackend.enumType.StatutModerationProduit;
 import com.cybernerd.agriConnect_APIBackend.model.Produit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -78,4 +79,6 @@ public interface ProduitRepository extends JpaRepository<Produit, UUID> {
     // Produits en rupture de stock
     @Query("SELECT p FROM Produit p WHERE p.quantiteDisponible = 0 AND p.disponible = true")
     List<Produit> findProduitsEnRupture();
+
+    List<Produit> findByStatutModeration(StatutModerationProduit statutModeration);
 } 

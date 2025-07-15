@@ -2,6 +2,7 @@ package com.cybernerd.agriConnect_APIBackend.serviceImpl;
 
 import com.cybernerd.agriConnect_APIBackend.dtos.commande.CommandeRequest;
 import com.cybernerd.agriConnect_APIBackend.dtos.commande.CommandeResponse;
+import com.cybernerd.agriConnect_APIBackend.dtos.commande.LivraisonRequest;
 import com.cybernerd.agriConnect_APIBackend.dtos.panier.PanierResponse;
 import com.cybernerd.agriConnect_APIBackend.enumType.StatutCommande;
 import com.cybernerd.agriConnect_APIBackend.model.Acheteur;
@@ -13,7 +14,9 @@ import com.cybernerd.agriConnect_APIBackend.repository.CommandeRepository;
 import com.cybernerd.agriConnect_APIBackend.repository.ElementCommandeRepository;
 import com.cybernerd.agriConnect_APIBackend.repository.ProduitRepository;
 import com.cybernerd.agriConnect_APIBackend.service.CommandeService;
+import com.cybernerd.agriConnect_APIBackend.service.NotificationService;
 import com.cybernerd.agriConnect_APIBackend.service.PanierService;
+import com.cybernerd.agriConnect_APIBackend.service.LivraisonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,6 +43,8 @@ public class CommandeServiceImpl implements CommandeService {
     private final AcheteurRepository acheteurRepository;
     private final ProduitRepository produitRepository;
     private final PanierService panierService;
+    private final NotificationService notificationService;
+    private final LivraisonService livraisonService;
 
     private static final BigDecimal FRAIS_LIVRAISON_STANDARD = new BigDecimal("5.00");
     private static final BigDecimal FRAIS_LIVRAISON_GRATUIT = new BigDecimal("0.00");
@@ -103,6 +108,31 @@ public class CommandeServiceImpl implements CommandeService {
         // Vider le panier
         panierService.viderPanier(acheteurId);
 
+        // Notifier chaque producteur concerné
+        List<UUID> producteursNotifies = elements.stream()
+            .map(e -> e.getProduit().getProducteur().getId())
+            .distinct()
+            .collect(Collectors.toList());
+        for (UUID prodId : producteursNotifies) {
+            Produit produit = elements.stream().filter(e -> e.getProduit().getProducteur().getId().equals(prodId)).findFirst().get().getProduit();
+            notificationService.notifier(
+                produit.getProducteur(),
+                "Nouvelle commande reçue pour votre produit : " + produit.getNom(),
+                "COMMANDE_NOUVELLE"
+            );
+        }
+
+        // Création de la livraison si souhaitée
+        if (Boolean.TRUE.equals(request.getSouhaiteLivraison())) {
+            LivraisonRequest livraisonRequest = new LivraisonRequest();
+            livraisonRequest.setCommandeId(savedCommande.getId());
+            livraisonRequest.setPartenaireLogistiqueId(request.getPartenaireLogistiqueId());
+            livraisonRequest.setDateLivraisonPrevue(commande.getDateLivraisonEstimee());
+            livraisonRequest.setInformationsSuivi(null);
+            livraisonRequest.setCout(commande.getFraisLivraison().doubleValue());
+            livraisonService.creerLivraison(livraisonRequest);
+        }
+
         log.info("Commande créée avec succès: {}", savedCommande.getNumeroCommande());
         return mapToCommandeResponse(savedCommande);
     }
@@ -162,6 +192,13 @@ public class CommandeServiceImpl implements CommandeService {
 
         Commande updatedCommande = commandeRepository.save(commande);
         log.info("Statut de la commande mis à jour: {} -> {}", commandeId, nouveauStatut);
+        
+        // Notifier l'acheteur du changement de statut
+        notificationService.notifier(
+            commande.getAcheteur(),
+            "Le statut de votre commande " + commande.getNumeroCommande() + " est maintenant : " + nouveauStatut,
+            "COMMANDE_STATUT"
+        );
         
         return mapToCommandeResponse(updatedCommande);
     }

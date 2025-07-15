@@ -1,5 +1,6 @@
 package com.cybernerd.agriConnect_APIBackend.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,44 +21,55 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+@Schema(description = "Modèle représentant le panier d'un acheteur")
 public class Panier {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Schema(description = "Identifiant unique du panier", example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "acheteur_id", nullable = false)
+    @Schema(description = "Acheteur propriétaire du panier")
     private Acheteur acheteur;
 
     @OneToMany(mappedBy = "panier", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @Schema(description = "Liste des éléments dans le panier")
     private List<ElementPanier> elements = new ArrayList<>();
 
+    @Schema(description = "Code promo appliqué", example = "PROMO10")
     private String codePromo;
 
     @Column(precision = 10, scale = 2)
     @Builder.Default
+    @Schema(description = "Sous-total du panier", example = "25.00")
     private BigDecimal sousTotal = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
     @Builder.Default
+    @Schema(description = "Frais de livraison", example = "5.00")
     private BigDecimal fraisLivraison = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
     @Builder.Default
+    @Schema(description = "Montant de la remise", example = "2.00")
     private BigDecimal remise = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2)
     @Builder.Default
+    @Schema(description = "Total à payer", example = "28.00")
     private BigDecimal total = BigDecimal.ZERO;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
+    @Schema(description = "Date de création du panier")
     private LocalDateTime dateCreation;
 
     @LastModifiedDate
     @Column(nullable = false)
+    @Schema(description = "Date de dernière modification du panier")
     private LocalDateTime dateModification;
 
     // Méthodes utilitaires

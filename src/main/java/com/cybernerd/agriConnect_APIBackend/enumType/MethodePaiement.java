@@ -5,5 +5,6 @@ public enum MethodePaiement {
     MOBILE_MONEY,
     VIREMENT_BANCAIRE,
     ESPECES_LIVRAISON,
-    PAYPAL
+    PAYPAL,
+    STRIPE
 } 

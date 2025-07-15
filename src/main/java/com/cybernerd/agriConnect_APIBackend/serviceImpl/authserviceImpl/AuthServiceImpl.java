@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,6 @@ import com.cybernerd.agriConnect_APIBackend.model.Producteur;
 import com.cybernerd.agriConnect_APIBackend.model.Utilisateur;
 import com.cybernerd.agriConnect_APIBackend.repository.UtilisateurRepository;
 import com.cybernerd.agriConnect_APIBackend.service.authService.AuthService;
-import com.cybernerd.agriConnect_APIBackend.security.CustomUserDetailsService;
 import com.cybernerd.agriConnect_APIBackend.security.JwtService;
 
 @Service
@@ -27,12 +27,12 @@ public class AuthServiceImpl implements AuthService {
     private JavaMailSender mailSender;
     private UtilisateurRepository utilisateurRepository;
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public AuthServiceImpl( 
         JwtService jwtService, 
-        CustomUserDetailsService userDetailsService,
+        UserDetailsService userDetailsService,
         JavaMailSender mailSender,
         UtilisateurRepository utilisateurRepository) {
 
@@ -48,75 +48,33 @@ public class AuthServiceImpl implements AuthService {
         if (utilisateurRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Un utilisateur avec cet email existe déjà");
         }
-
         // Encoder le mot de passe
         String motDePasseEncode = passwordEncoder.encode(request.getMotDePasse());
-
-        // Créer l'utilisateur selon le rôle
-        Utilisateur utilisateur;
-        if (request.getRole().name().equals("PRODUCTEUR")) {
-            Producteur producteur = new Producteur();
-            producteur.setNom(request.getNom());
-            producteur.setEmail(request.getEmail());
-            producteur.setMotDePasse(motDePasseEncode);
-            producteur.setRole(request.getRole());
-            producteur.setTelephone(request.getTelephone());
-            producteur.setAdresse(request.getAdresse());
-            producteur.setVille(request.getVille());
-            producteur.setCodePostal(request.getCodePostal());
-            producteur.setPays(request.getPays());
-            
-            // Champs spécifiques au producteur
-            producteur.setNomExploitation(request.getNomExploitation());
-            producteur.setDescriptionExploitation(request.getDescriptionExploitation());
-            producteur.setCertifieBio(request.isCertifieBio());
-            producteur.setAdresseExploitation(request.getAdresseExploitation());
-            producteur.setVilleExploitation(request.getVilleExploitation());
-            producteur.setCodePostalExploitation(request.getCodePostalExploitation());
-            producteur.setPaysExploitation(request.getPaysExploitation());
-            producteur.setTelephoneExploitation(request.getTelephoneExploitation());
-            
-            utilisateur = producteur;
-        } else {
-            Acheteur acheteur = new Acheteur();
-            acheteur.setNom(request.getNom());
-            acheteur.setEmail(request.getEmail());
-            acheteur.setMotDePasse(motDePasseEncode);
-            acheteur.setRole(request.getRole());
-            acheteur.setTelephone(request.getTelephone());
-            acheteur.setAdresse(request.getAdresse());
-            acheteur.setVille(request.getVille());
-            acheteur.setCodePostal(request.getCodePostal());
-            acheteur.setPays(request.getPays());
-            
-            utilisateur = acheteur;
-        }
-
-        // Générer un token de vérification d'email
-        String emailVerificationToken = jwtService.generateEmailVerificationToken(utilisateur.getEmail());
-        utilisateur.setEmailVerificationToken(emailVerificationToken);
-
-        // Par défaut, l'email n'est pas vérifié
-        utilisateur.setEmailVerifie(false);
-
-        // Enregistrer l'utilisateur dans la base de données
-        utilisateurRepository.save(utilisateur);
-        
-        // Envoyer l'email de vérification
-        sendVerificationEmail(utilisateur.getEmail());
-        
-        // Retourner la réponse d'authentification
+        // Créer un acheteur basique
+        Acheteur acheteur = new Acheteur();
+        acheteur.setNom(request.getNom());
+        acheteur.setEmail(request.getEmail());
+        acheteur.setMotDePasse(motDePasseEncode);
+        acheteur.setRole(com.cybernerd.agriConnect_APIBackend.enumType.Role.ACHETEUR);
+        acheteur.setTelephone(request.getTelephone());
+        acheteur.setEmailVerifie(false);
+        acheteur.setFromGoogle(false);
+        // Générer un code de vérification à 6 chiffres
+        String codeVerification = String.format("%06d", (int)(Math.random() * 1000000));
+        acheteur.setCodeVerificationEmail(codeVerification);
+        acheteur.setCodeVerificationExpiration(java.time.LocalDateTime.now().plusHours(24));
+        // Enregistrer l'utilisateur
+        utilisateurRepository.save(acheteur);
+        // Envoyer l'email de vérification avec le code
+        sendVerificationEmail(acheteur.getEmail(), codeVerification);
+        // Retourner la réponse
         return AuthResponse.builder()
-                .id(utilisateur.getId())
-                .nom(utilisateur.getNom())
-                .email(utilisateur.getEmail())
-                .telephone(utilisateur.getTelephone())
-                .role(utilisateur.getRole())
-                .emailVerifie(utilisateur.isEmailVerifie())
-                .adresse(utilisateur.getAdresse())
-                .ville(utilisateur.getVille())
-                .codePostal(utilisateur.getCodePostal())
-                .pays(utilisateur.getPays())
+                .id(acheteur.getId())
+                .nom(acheteur.getNom())
+                .email(acheteur.getEmail())
+                .telephone(acheteur.getTelephone())
+                .role(acheteur.getRole())
+                .emailVerifie(acheteur.isEmailVerifie())
                 .build();
     }
 
@@ -141,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Générer le token JWT
         String jwt = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
+        // String refreshToken = jwtService.generateRefreshToken(userDetails); // supprimé
 
         // Construire la réponse
         AuthResponse.AuthResponseBuilder responseBuilder = AuthResponse.builder()
@@ -151,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
                 .telephone(utilisateur.getTelephone())
                 .role(utilisateur.getRole())
                 .token(jwt)
-                .refreshToken(refreshToken)
+                .refreshToken("") // refreshToken non géré
                 .emailVerifie(utilisateur.isEmailVerifie())
                 .adresse(utilisateur.getAdresse())
                 .ville(utilisateur.getVille())
@@ -189,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
 
             // Générer un nouveau token JWT
             String newToken = jwtService.generateToken(userDetails);
-            String newRefreshToken = jwtService.generateRefreshToken(userDetails);
+            // String newRefreshToken = jwtService.generateRefreshToken(userDetails); // supprimé
 
             // Charger l'utilisateur pour les informations supplémentaires
             Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
@@ -203,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
                     .telephone(utilisateur.getTelephone())
                     .role(utilisateur.getRole())
                     .token(newToken)
-                    .refreshToken(newRefreshToken)
+                    .refreshToken("") // refreshToken non géré
                     .emailVerifie(utilisateur.isEmailVerifie())
                     .adresse(utilisateur.getAdresse())
                     .ville(utilisateur.getVille())
@@ -226,43 +184,47 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyEmail(String token) {
-        // Implémentation de la vérification de l'email
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmailVerificationToken(token);
+    public void verifyEmail(String code) {
+        // Vérification du code à 6 chiffres
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByCodeVerificationEmail(code);
         if (utilisateurOpt.isPresent()) {
             Utilisateur utilisateur = utilisateurOpt.get();
+            if (utilisateur.getCodeVerificationExpiration() == null || utilisateur.getCodeVerificationExpiration().isBefore(java.time.LocalDateTime.now())) {
+                throw new RuntimeException("Code de vérification expiré, veuillez demander un nouveau code.");
+            }
             utilisateur.setEmailVerifie(true);
-            utilisateur.setEmailVerificationToken(null);
+            utilisateur.setCodeVerificationEmail(null);
+            utilisateur.setCodeVerificationExpiration(null);
             utilisateurRepository.save(utilisateur);
         } else {
-            throw new RuntimeException("Token de vérification invalide ou expiré");
+            throw new RuntimeException("Code de vérification invalide ou expiré");
         }
     }
 
     @Override
-    public void sendVerificationEmail(String email) {
-        // Implémentation de l'envoi d'email de vérification
+    public void sendVerificationEmail(String email, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Vérification de votre compte AgriConnect");
-        message.setText("Cliquez sur le lien suivant pour vérifier votre compte : " +
-                "http://localhost:8080/api/v1/auth/verify?token=" + 
-                jwtService.generateEmailVerificationToken(email));
+        message.setText("Votre code de vérification est : " + code);
         mailSender.send(message);
     }
 
     @Override
     public void resendVerificationEmail(String email) {
-        // Implémentation de la renvoi d'email de vérification
-        sendVerificationEmail(email);
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
+        if (utilisateurOpt.isPresent()) {
+            Utilisateur utilisateur = utilisateurOpt.get();
+            String codeVerification = String.format("%06d", (int)(Math.random() * 1000000));
+            utilisateur.setCodeVerificationEmail(codeVerification);
+            utilisateur.setCodeVerificationExpiration(java.time.LocalDateTime.now().plusHours(24));
+            utilisateurRepository.save(utilisateur);
+            sendVerificationEmail(email, codeVerification);
+        } else {
+            throw new RuntimeException("Utilisateur non trouvé");
+        }
     }
 
-    @Override
-    public void resetPassword(String token, String newPassword) {
-        // Implémentation de la réinitialisation du mot de passe
-        // Ici vous devriez valider le token et mettre à jour le mot de passe
-        throw new UnsupportedOperationException("Méthode non implémentée");
-    }
 
     @Override
     public void sendPasswordResetEmail(String email) {
@@ -272,14 +234,9 @@ public class AuthServiceImpl implements AuthService {
         message.setSubject("Réinitialisation de mot de passe - AgriConnect");
         message.setText("Cliquez sur le lien suivant pour réinitialiser votre mot de passe : " +
                 "http://localhost:8080/api/v1/auth/reset-password?token=" + 
-                jwtService.generatePasswordResetToken(email));
+                "TOKEN_A_GENERER" // jwtService.generatePasswordResetToken(email) supprimé
+        );
         mailSender.send(message);
-    }
-
-    @Override
-    public void logoutUser(String token) {
-        // Implémentation de la déconnexion de l'utilisateur
-        // Ici vous pourriez ajouter le token à une liste noire
     }
 
     @Override

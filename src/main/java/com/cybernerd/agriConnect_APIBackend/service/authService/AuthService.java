@@ -11,15 +11,11 @@ public interface AuthService {
 
     AuthResponse refreshToken(String token);
 
-    void verifyEmail(String token);
+    void verifyEmail(String code);
 
-    void sendVerificationEmail(String email);
-
-    void resetPassword(String token, String newPassword);
+    void sendVerificationEmail(String email, String code);
 
     void sendPasswordResetEmail(String email);
-
-    void logoutUser(String token);
 
     boolean isEmailVerified(String email);
 

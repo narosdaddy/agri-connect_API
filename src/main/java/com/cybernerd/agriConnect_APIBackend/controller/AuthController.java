@@ -3,6 +3,7 @@ package com.cybernerd.agriConnect_APIBackend.controller;
 import com.cybernerd.agriConnect_APIBackend.dtos.auth.AuthResponse;
 import com.cybernerd.agriConnect_APIBackend.dtos.auth.LoginRequest;
 import com.cybernerd.agriConnect_APIBackend.dtos.auth.RegisterRequest;
+import com.cybernerd.agriConnect_APIBackend.dtos.auth.EmailVerificationRequest;
 import com.cybernerd.agriConnect_APIBackend.service.authService.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,8 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+@RequestMapping("auth")
 @Tag(name = "Authentification", description = "API pour la gestion de l'authentification")
 @RequiredArgsConstructor
 public class AuthController {
@@ -68,12 +68,12 @@ public class AuthController {
     @Operation(summary = "Vérification de l'email")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Email vérifié avec succès"),
-        @ApiResponse(responseCode = "400", description = "Token invalide ou expiré")
+        @ApiResponse(responseCode = "400", description = "Code invalide ou expiré")
     })
-    @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+    @PostMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestBody EmailVerificationRequest request) {
         try {
-            authService.verifyEmail(token);
+            authService.verifyEmail(request.getCode());
             return ResponseEntity.ok("Email vérifié avec succès");
         } catch (Exception e) {
             logger.error("Erreur de vérification d'email: ", e);
@@ -113,22 +113,6 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Réinitialiser le mot de passe")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Mot de passe réinitialisé"),
-        @ApiResponse(responseCode = "400", description = "Token invalide")
-    })
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        try {
-            authService.resetPassword(token, newPassword);
-            return ResponseEntity.ok("Mot de passe réinitialisé avec succès");
-        } catch (Exception e) {
-            logger.error("Erreur de réinitialisation de mot de passe: ", e);
-            throw e;
-        }
-    }
-
     @Operation(summary = "Envoyer un email de réinitialisation de mot de passe")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Email envoyé"),
@@ -155,18 +139,4 @@ public class AuthController {
         return ResponseEntity.ok(verified);
     }
 
-    @Operation(summary = "Déconnexion de l'utilisateur")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Déconnexion réussie")
-    })
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestParam String token) {
-        try {
-            authService.logoutUser(token);
-            return ResponseEntity.ok("Déconnexion réussie");
-        } catch (Exception e) {
-            logger.error("Erreur de déconnexion: ", e);
-            throw e;
-        }
-    }
 }

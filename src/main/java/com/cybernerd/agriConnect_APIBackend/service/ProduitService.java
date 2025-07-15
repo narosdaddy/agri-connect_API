@@ -2,7 +2,6 @@ package com.cybernerd.agriConnect_APIBackend.service;
 
 import com.cybernerd.agriConnect_APIBackend.dtos.produit.ProduitRequest;
 import com.cybernerd.agriConnect_APIBackend.dtos.produit.ProduitResponse;
-import com.cybernerd.agriConnect_APIBackend.enumType.CategorieProduit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,7 @@ public interface ProduitService {
     Page<ProduitResponse> getAllProduits(Pageable pageable);
 
     Page<ProduitResponse> rechercherProduits(
-            CategorieProduit categorie,
+            String categorieId,
             Boolean bio,
             BigDecimal prixMin,
             BigDecimal prixMax,
