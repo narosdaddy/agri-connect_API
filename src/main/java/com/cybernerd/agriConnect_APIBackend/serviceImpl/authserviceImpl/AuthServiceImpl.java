@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
 
@@ -243,5 +245,24 @@ public class AuthServiceImpl implements AuthService {
     public boolean isEmailVerified(String email) {
         Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
         return utilisateurOpt.map(Utilisateur::isEmailVerifie).orElse(false);
+    }
+
+    @Override
+    public Utilisateur getCurrentUtilisateur() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new RuntimeException("Aucun utilisateur authentifié");
+        }
+        String email;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        } else if (principal instanceof String) {
+            email = (String) principal;
+        } else {
+            throw new RuntimeException("Impossible de déterminer l'utilisateur connecté");
+        }
+        return utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur connecté non trouvé dans la base de données"));
     }
 }

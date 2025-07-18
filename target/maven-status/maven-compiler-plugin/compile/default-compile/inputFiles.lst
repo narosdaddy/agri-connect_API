@@ -14,6 +14,7 @@ C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\repository\PartenaireLogistiqueRepository.java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\model\CategorieProduit.java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\serviceImpl\PaiementServiceImpl.java
+C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\dtos\auth\ProfilResponse.java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\controller\SuperAdminController.java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\model\Acheteur.java
 C:\Users\Utilisateur\Documents\SEMESTRE_6\PPE-302\agri-connect_API\src\main\java\com\cybernerd\agriConnect_APIBackend\service\LivraisonService.java

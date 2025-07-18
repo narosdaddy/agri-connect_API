@@ -20,4 +20,10 @@ public interface AuthService {
     boolean isEmailVerified(String email);
 
     void resendVerificationEmail(String email);
+
+    /**
+     * Récupère l'utilisateur connecté à partir du contexte de sécurité Spring
+     * @return l'entité Utilisateur correspondant à l'utilisateur authentifié
+     */
+    com.cybernerd.agriConnect_APIBackend.model.Utilisateur getCurrentUtilisateur();
 }
